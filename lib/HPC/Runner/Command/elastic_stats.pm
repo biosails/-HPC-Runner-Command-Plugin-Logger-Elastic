@@ -1,7 +1,6 @@
 package HPC::Runner::Command::elastic_stats;
 use MooseX::App::Command;
 
-use Data::Dumper;
 use Log::Log4perl qw(:easy);
 use JSON;
 use Text::ASCIITable;
