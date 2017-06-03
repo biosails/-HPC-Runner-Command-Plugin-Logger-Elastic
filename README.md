@@ -1,3 +1,13 @@
+### submission\_id
+
+This is the ID for the entire hpcrunner.pl submit\_jobs submission, not the individual scheduler IDs
+
+### nodes
+
+### elasticsearch
+
+elastic search connection object
+
 # NAME
 
 HPC::Runner::Command::Plugin::Logger::Elastic - Blah blah blah
