@@ -5,10 +5,8 @@ use Test::Class::Moose::Runner;
 
 ##Run the main applications tests
 
-    Test::Class::Moose::Runner->new(
-        test_classes => [
-	    'TestsFor::HPC::Runner::Command::Test001',
-	    'TestsFor::HPC::Runner::Command::Test002',
-	    # 'TestsFor::HPC::Runner::Command::Test007',
-        ],
-    )->runtests;
+Test::Class::Moose::Runner->new(
+    test_classes => [
+        'TestsFor::HPC::Runner::Command::Plugin::Logger::Elastic::Test001',
+    ],
+)->runtests;
