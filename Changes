@@ -1,6 +1,7 @@
 Revision history for HPC-Runner-Command-Plugin-Logger-Elastic
 
 {{$NEXT}}
+	- Updated deps
 
 0.02  2017-06-11 15:43:08 GST
 	- Added in some error checking for nodes
