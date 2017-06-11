@@ -92,7 +92,7 @@ __END__
 
 =head1 NAME
 
-HPC::Runner::Command::Plugin::Logger::Elastic
+HPC::Runner::Command::Plugin::Logger::Elastic - Log HPC::Runner::Command metadata to elasticsearch
 
 =head1 SYNOPSIS
 

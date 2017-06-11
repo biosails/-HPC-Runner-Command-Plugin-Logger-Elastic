@@ -10,15 +10,34 @@ elastic search connection object
 
 # NAME
 
-HPC::Runner::Command::Plugin::Logger::Elastic - Blah blah blah
+HPC::Runner::Command::Plugin::Logger::Elastic - Log HPC::Runner::Command metadata to elasticsearch
 
 # SYNOPSIS
 
-    use HPC::Runner::Command::Plugin::Logger::Elastic;
+On the command line
+
+    hpcrunner.pl submit_jobs --infile my_submission_file.in --plugins Logger::Elastic
+
+On the command line with elastic nodes specified
+
+    hpcrunner.pl submit_jobs --infile my_submission_file.in --plugins Logger::Elastic --plugin_opts nodes='http://localhost:9200'
+
+In a configuration file (.hpcrunner.yml)
+
+    global:
+      plugins:
+        - 'Logger::Elastic'
 
 # DESCRIPTION
 
-HPC::Runner::Command::Plugin::Logger::Elastic is
+HPC::Runner::Command::Plugin::Logger::Elastic is a plugin that hooks into the
+HPC::Runner::Command libraries, and adds elasticsearch logging capabilities.
+
+This is still a very beta release.
+
+# ABSTRACT
+
+Log HPC::Runner::Command meta to elastic search.
 
 # AUTHOR
 
