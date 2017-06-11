@@ -66,6 +66,7 @@ option 'nodes' => (
     },
     documentation => q(Elastic Search nodes. Default is 'http://localhost:9200'),
     lazy => 1,
+    coerce => 1,
 );
 
 =head3 elasticsearch
@@ -92,7 +93,7 @@ __END__
 
 =head1 NAME
 
-HPC::Runner::Command::Plugin::Logger::Elastic
+HPC::Runner::Command::Plugin::Logger::Elastic - Log HPC::Runner::Command metadata to elasticsearch
 
 =head1 SYNOPSIS
 

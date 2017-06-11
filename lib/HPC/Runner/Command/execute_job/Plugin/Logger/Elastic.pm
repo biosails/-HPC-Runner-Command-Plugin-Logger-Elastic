@@ -117,6 +117,8 @@ around 'log_table' => sub {
     );
 };
 
+##TODO create interface for exporting variables as environmental variables
+## HPCR_PLUGIN_SHORTCODE_VAR
 around 'execute' => sub {
     my $orig = shift;
     my $self = shift;
