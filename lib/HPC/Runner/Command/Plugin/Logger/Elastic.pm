@@ -1,6 +1,6 @@
 package HPC::Runner::Command::Plugin::Logger::Elastic;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use MooseX::App::Role;
 

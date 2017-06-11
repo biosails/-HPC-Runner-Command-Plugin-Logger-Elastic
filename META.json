@@ -88,7 +88,7 @@
          "web" : "https://github.com/biosails/-HPC-Runner-Command-Plugin-Logger-Elastic"
       }
    },
-   "version" : "0.02",
+   "version" : "0.03",
    "x_serialization_backend" : "Cpanel::JSON::XS version 3.0225"
 }
 
