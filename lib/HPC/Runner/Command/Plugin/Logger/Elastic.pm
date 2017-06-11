@@ -117,6 +117,10 @@ HPC::Runner::Command libraries, and adds elasticsearch logging capabilities.
 
 This is still a very beta release.
 
+=head1 ABSTRACT
+
+Log HPC::Runner::Command meta to elastic search.
+
 =head1 AUTHOR
 
 Jillian Rowe E<lt>jillian.e.rowe@gmail.comE<gt>

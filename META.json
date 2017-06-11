@@ -1,5 +1,5 @@
 {
-   "abstract" : "Blah blah blah",
+   "abstract" : "Log HPC::Runner::Command metadata to ElasticSearch.",
    "author" : [
       "Jillian Rowe <jillian.e.rowe@gmail.com>"
    ],
