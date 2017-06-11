@@ -14,24 +14,24 @@ command_long_description 'Query Elastic Search for a submission overview.';
 
 #TODO project and jobname are already defined as options in execute_array
 option 'most_recent' => (
-    is       => 'rw',
-    isa      => 'Bool',
-    required => 0,
-    default  => 1,
+    is            => 'rw',
+    isa           => 'Bool',
+    required      => 0,
+    default       => 1,
     documentation => q(Show only the most recent submission.),
-    trigger  => sub {
+    trigger       => sub {
         my $self = shift;
         $self->all(1) if !$self->most_recent;
     }
 );
 
 option 'all' => (
-    is       => 'rw',
-    isa      => 'Bool',
-    required => 0,
-    default  => 0,
+    is            => 'rw',
+    isa           => 'Bool',
+    required      => 0,
+    default       => 0,
     documentation => 'Show all submissions.',
-    trigger  => sub {
+    trigger       => sub {
         my $self = shift;
         $self->most_recent(1) if !$self->all;
     },
@@ -86,6 +86,8 @@ has 'task_data' => (
 
 sub execute {
     my $self = shift;
+
+    return unless $self->elasticsearch;
     $self->iter_submissions;
 }
 
@@ -93,7 +95,7 @@ sub iter_submissions {
     my $self    = shift;
     my $results = $self->get_submissions();
 
-    my $total   = scalar @{$results};
+    my $total = scalar @{$results};
     $total = 0 if $self->most_recent;
 
     for ( my $x = 0 ; $x <= $total ; $x++ ) {

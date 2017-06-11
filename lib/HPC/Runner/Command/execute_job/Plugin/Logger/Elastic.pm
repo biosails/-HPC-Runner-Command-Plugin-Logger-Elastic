@@ -27,6 +27,25 @@ around 'start_command_log' => sub {
     my $self   = shift;
     my $cmdpid = shift;
 
+    $self->create_elastic_task($cmdpid);
+
+    $self->$orig($cmdpid);
+};
+
+around 'log_table' => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    $self->$orig(@_);
+    $self->update_elastic_task;
+};
+
+sub create_elastic_task {
+    my $self   = shift;
+    my $cmdpid = shift;
+
+    return unless $self->elasticsearch;
+
     my $job_meta = {};
 
     if ( $self->metastr ) {
@@ -45,12 +64,9 @@ around 'start_command_log' => sub {
         job_meta      => $job_meta,
     };
 
-    if ( $self->can('task_id') ) {
-        $task_obj->{task_id} = $self->task_id;
-    }
-    if ( $self->job_scheduler_id ) {
-        $task_obj->{scheduler_id} = $self->job_scheduler_id;
-    }
+    $task_obj->{task_id} = $self->task_id if $self->can('task_id');
+    $task_obj->{scheduler_id} = $self->job_scheduler_id
+      if $self->can('scheduler_id');
 
     my $doc;
     try {
@@ -72,15 +88,12 @@ around 'start_command_log' => sub {
     else {
         $self->table_data->{doc_id} = $doc->{_id};
     }
+}
 
-    $self->$orig($cmdpid);
-};
-
-around 'log_table' => sub {
-    my $orig = shift;
+sub update_elastic_task {
     my $self = shift;
 
-    $self->$orig(@_);
+    return unless $self->elasticsearch;
 
     my $tags = "";
     if ( exists $self->table_data->{task_tags} ) {
@@ -115,7 +128,7 @@ around 'log_table' => sub {
         type  => 'task',
         id    => $self->table_data->{doc_id}
     );
-};
+}
 
 ##TODO create interface for exporting variables as environmental variables
 ## HPCR_PLUGIN_SHORTCODE_VAR
@@ -125,6 +138,7 @@ around 'execute' => sub {
 
     $ENV{'HPCR_ES_SUBMISSION_ID'} = $self->submission_id;
 
+    $self->$orig();
 };
 
 ##Make elasticsearch time format happy

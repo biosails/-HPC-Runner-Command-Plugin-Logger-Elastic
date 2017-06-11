@@ -7,6 +7,7 @@ use MooseX::App::Role;
 use Cwd;
 use Log::Log4perl qw(:easy);
 use Search::Elasticsearch;
+use Try::Tiny;
 
 ##TODO this declaration should be a role
 with 'HPC::Runner::Command::Utils::ManyConfigs';
@@ -64,8 +65,9 @@ option 'nodes' => (
     default => sub {
         return ['http://localhost:9200'];
     },
-    documentation => q(Elastic Search nodes. Default is 'http://localhost:9200'),
-    lazy => 1,
+    documentation =>
+      q(Elastic Search nodes. Default is 'http://localhost:9200'),
+    lazy   => 1,
     coerce => 1,
 );
 
@@ -77,13 +79,37 @@ elastic search connection object
 
 has 'elasticsearch' => (
     is      => 'rw',
+    predicate => 'has_elasticsearch',
     lazy    => 1,
     default => sub {
         my $self = shift;
-        my $e = Search::Elasticsearch->new( nodes => $self->nodes );
-        return $e;
+        return Search::Elasticsearch->new( nodes => $self->nodes );
     },
 );
+
+sub elasticsearch_sanity {
+    my $self = shift;
+
+    try {
+        $self->elasticsearch->cluster->health;
+    }
+    catch {
+        $self->app_log->info(
+'HPC::Runner::Command was not able to connect to the ElasticSearch! '
+              . 'Please ensure the nodes is supplied if not localhost. '
+              . "\n"
+              . $_ );
+
+        $self->elasticsearch(undef);
+    };
+
+}
+
+before 'execute' => sub {
+    my $self = shift;
+
+    $self->elasticsearch_sanity;
+};
 
 1;
 
