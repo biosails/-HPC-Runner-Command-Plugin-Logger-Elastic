@@ -17,18 +17,40 @@ around 'execute' => sub {
     my $orig = shift;
     my $self = shift;
 
-    ##TODO add dsn string
-    try {
-        $self->elasticsearch->indices->create( index => 'hpcrunner', );
-    };
+    $self->create_elastic_submission;
+
+    $self->$orig(@_);
+
+    $self->update_elastic_submission;
+};
+
+=head3 create_elastic_submission
+
+If there is an elasticsearch create the initial submission - which we then update
+
+=cut
+
+sub create_elastic_submission {
+    my $self = shift;
+
+    return unless $self->elasticsearch;
 
     ##Create initial document
-    my $dt  = DateTime->now();
-    my $doc = $self->elasticsearch->index(
-        index => 'hpcrunner',
-        type  => 'submission',
-        body  => { submission_time => "$dt" },
-    );
+    my $dt = DateTime->now(time_zone => 'local');
+    my $doc;
+    try {
+        $doc = $self->elasticsearch->index(
+            index => 'hpcrunner',
+            type  => 'submission',
+            body  => { submission_time => "$dt" },
+        );
+    }
+    catch {
+        $self->app_log->info(
+            'HPC::Runner::Command was not able to index the submission! '
+              . $! );
+        return;
+    };
 
     if ( !$doc || !exists $doc->{_id} ) {
         $self->app_log->warn('There was an error indexing the submissions!');
@@ -38,16 +60,23 @@ around 'execute' => sub {
         my $id = $doc->{_id};
         $self->submission_id($id);
     }
+}
 
-    $self->$orig(@_);
+=head3 update_elastic_submission
 
-    ##Update the document after submission
+Take the initial submission and update it to contain the hpcmeta
+
+=cut
+
+sub update_elastic_submission {
+    my $self = shift;
+
+    return unless $self->elasticsearch;
 
     my $hpc_meta = $self->gen_hpc_meta;
 
     # $hpc_meta->{batches} = $self->job_stats->batches;
     # my $json_text = encode_json $hpc_meta;
-
     my $body = {};
     $body->{project} = $self->project if $self->has_project;
     $body->{hpc_meta} = $hpc_meta;
@@ -61,7 +90,7 @@ around 'execute' => sub {
         }
     );
 
-};
+}
 
 sub gen_hpc_meta {
     my $self = shift;
@@ -80,7 +109,7 @@ sub gen_hpc_meta {
         my $cpus      = $self->jobs->{$job}->cpus_per_task;
         my $walltime  = $self->jobs->{$job}->walltime;
 
-        $job_obj->{job} = $job;
+        $job_obj->{job}           = $job;
         $job_obj->{deps}          = $depstring;
         $job_obj->{total_tasks}   = $count_cmd;
         $job_obj->{walltime}      = $walltime;
@@ -110,7 +139,7 @@ sub gen_hpc_meta {
         }
 
         # $hpc_meta->{jobs}->{$job} = $job_obj;
-        push(@{$hpc_meta->{jobs}}, $job_obj);
+        push( @{ $hpc_meta->{jobs} }, $job_obj );
     }
 
     return $hpc_meta;
