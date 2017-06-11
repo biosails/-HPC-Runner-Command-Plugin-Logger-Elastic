@@ -4,17 +4,18 @@ our $VERSION = '0.01';
 
 use MooseX::App::Role;
 
+use Cwd;
+use Log::Log4perl qw(:easy);
+use Search::Elasticsearch;
+
 ##TODO this declaration should be a role
 with 'HPC::Runner::Command::Utils::ManyConfigs';
+use HPC::Runner::Command::Utils::Traits qw(ArrayRefOfStrs);
 
 option 'config_base' => (
     is      => 'rw',
     default => '.hpcrunner',
 );
-
-use Cwd;
-use Log::Log4perl qw(:easy);
-use Search::Elasticsearch;
 
 ##Application log
 ##TODO Add this to its own class in hpcrunner
@@ -59,7 +60,7 @@ option 'submission_id' => (
 
 option 'nodes' => (
     is      => 'rw',
-    isa     => 'ArrayRef',
+    isa     => ArrayRefOfStrs,
     default => sub {
         return ['http://localhost:9200'];
     },
@@ -91,15 +92,30 @@ __END__
 
 =head1 NAME
 
-HPC::Runner::Command::Plugin::Logger::Elastic - Blah blah blah
+HPC::Runner::Command::Plugin::Logger::Elastic
 
 =head1 SYNOPSIS
 
-  use HPC::Runner::Command::Plugin::Logger::Elastic;
+On the command line
+
+  hpcrunner.pl submit_jobs --infile my_submission_file.in --plugins Logger::Elastic
+
+On the command line with elastic nodes specified
+
+  hpcrunner.pl submit_jobs --infile my_submission_file.in --plugins Logger::Elastic --plugin_opts nodes='http://localhost:9200'
+
+In a configuration file (.hpcrunner.yml)
+
+  global:
+    plugins:
+      - 'Logger::Elastic'
 
 =head1 DESCRIPTION
 
-HPC::Runner::Command::Plugin::Logger::Elastic is
+HPC::Runner::Command::Plugin::Logger::Elastic is a plugin that hooks into the
+HPC::Runner::Command libraries, and adds elasticsearch logging capabilities.
+
+This is still a very beta release.
 
 =head1 AUTHOR
 

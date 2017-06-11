@@ -57,9 +57,14 @@ sub iter_tasks_long {
 
         my $task_tags  = $task->{_source}->{task_tags}  || '';
         my $start_time = $task->{_source}->{start_time} || '';
+
         my $end_time   = $task->{_source}->{exit_time}  || '';
-        my $exit_code  = $task->{_source}->{exit_code}  || '';
         my $duration   = $task->{_source}->{duration}   || '';
+        my $exit_code  = $task->{_source}->{exit_code};
+
+        if (!defined $exit_code){
+          $exit_code = '';
+        }
 
         $table->addRow(
             [

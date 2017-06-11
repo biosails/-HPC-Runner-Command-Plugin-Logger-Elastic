@@ -35,7 +35,6 @@ around 'execute' => sub {
         return;
     }
     else {
-        $self->app_log->info( 'Added in submission ' . Dumper($doc) );
         my $id = $doc->{_id};
         $self->submission_id($id);
     }
@@ -94,6 +93,8 @@ sub gen_hpc_meta {
             my $obj = {};
 
             #index start, index end
+            next unless $self->jobs->{$job}->batch_indexes->[$x];
+
             my $batch_start =
               $self->jobs->{$job}->batch_indexes->[$x]->{'batch_index_start'};
             my $batch_end =

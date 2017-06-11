@@ -4,6 +4,7 @@ use Moose::Role;
 use Data::Dumper;
 use DateTime;
 use JSON;
+use Try::Tiny;
 
 with 'HPC::Runner::Command::Plugin::Logger::Elastic';
 
@@ -51,14 +52,26 @@ around 'start_command_log' => sub {
         $task_obj->{scheduler_id} = $self->job_scheduler_id;
     }
 
-    my $doc = $self->elasticsearch->index(
-        index => 'hpcrunner',
-        type  => 'task',
-        body  => $task_obj,
-    );
+    my $doc;
+    try {
+        $doc = $self->elasticsearch->index(
+            index => 'hpcrunner',
+            type  => 'task',
+            body  => $task_obj,
+        );
+    }
+    catch {
+        $self->app_log->info('We were not able to index the task!');
+        $self->app_log->info( 'Error ' . $_ );
+    };
 
     ##TODO error checking ... so much error checking
-    $self->table_data->{doc_id} = $doc->{_id};
+    if ( !$doc || !exists $doc->{_id} ) {
+        $self->app_log->info('We were not able to index the task!');
+    }
+    else {
+        $self->table_data->{doc_id} = $doc->{_id};
+    }
 
     $self->$orig($cmdpid);
 };
@@ -83,8 +96,6 @@ around 'log_table' => sub {
         id    => $self->table_data->{doc_id}
     );
 
-    $self->app_log->info( 'Started task ' . Dumper($started_task) );
-
     my $updated_task = $self->elasticsearch->update(
         index => 'hpcrunner',
         type  => 'task',
@@ -104,7 +115,14 @@ around 'log_table' => sub {
         type  => 'task',
         id    => $self->table_data->{doc_id}
     );
-    $self->app_log->info( 'Updated task! ' . Dumper($final_task) );
+};
+
+around 'execute' => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    $ENV{'HPCR_ES_SUBMISSION_ID'} = $self->submission_id;
+
 };
 
 ##Make elasticsearch time format happy
